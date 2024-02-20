@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Form, Input } from 'antd';
 import { login } from '../libs/api';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logged } from '../store/user';
 import { clearToMovies } from '../store/movies';
@@ -69,11 +69,6 @@ const containner: React.CSSProperties = {
 
 const loginForm: React.CSSProperties = {
   width: '400px',
-};
-
-const loginFormForgot: React.CSSProperties = {
-  float: 'right',
-  marginLeft: 'auto',
 };
 
 const loginFormButton: React.CSSProperties = {
