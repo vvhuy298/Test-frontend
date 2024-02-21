@@ -13,8 +13,8 @@ export const updatePassword = (payload: any): AxiosPromise => {
   return axios.post('/reset-password', payload);
 };
 
-export const getMovies = (): AxiosPromise => {
-  return axios.get('/movies');
+export const getMovies = (payload: any): AxiosPromise => {
+  return axios.get('/movies', { params: payload });
 };
 
 export const favoriteMovie = (uuid: string, type: string): AxiosPromise => {

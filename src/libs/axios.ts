@@ -17,7 +17,6 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log(error);
     return Promise.reject(error);
   },
 );
@@ -27,8 +26,18 @@ instance.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log(error);
     return Promise.reject(error);
   },
 );
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function onResponseError(fn: Function) {
+  return instance.interceptors.response.use(
+    undefined,
+    (error) => fn(error) || Promise.reject(error),
+  );
+}
+export function onResponseErrorEject(id: number) {
+  instance.interceptors.response.eject(id);
+}
+
 export default instance;
