@@ -1,13 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Button, Card, Col, Row, Spin, notification } from 'antd';
+import { Button, Card, Divider, List, Spin } from 'antd';
 import Meta from 'antd/es/card/Meta';
 import { useCallback, useEffect, useState } from 'react';
 import { getMovies, favoriteMovie } from '../libs/api';
 import { useDispatch, useSelector } from 'react-redux';
-import { setToMovies, changeMoviestatus } from '../store/movies';
+import { changeMoviestatus, addToMovies, clearToMovies } from '../store/movies';
 import { BookOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { selectUser } from '../store/user';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 type MovieType = {
   imdbid: string;
@@ -18,59 +19,24 @@ type MovieType = {
   favorited: boolean;
 };
 
+type MetaType = {
+  current_page: number;
+  from: number;
+  last_page: number;
+  to: number;
+  total: number;
+};
+
 function Movies() {
-  const search = useSelector((state) => state.search.search);
   const moviesState = useSelector((state) => state.movies.movies);
   const [movies, setMovies] = useState([]);
+  const [meta, setMeta] = useState<MetaType>([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectUser);
 
-  const [api, contextHolder] = notification.useNotification();
-  const filterMoviesByTitle = useCallback((string: string, movies: any) => {
-    if (!string) return;
-    const searchString = string.toLowerCase();
-    const filterData = movies.filter((movie: MovieType) =>
-      movie.title.toLowerCase().includes(searchString),
-    );
-    if (filterData.length > 0) {
-      api.success({
-        message: 'Search done!',
-        description: 'Enjoy your list',
-      });
-      setMovies(filterData);
-    } else {
-      api.error({
-        message: 'Error search',
-        description: 'Have no movies with your search string',
-      });
-    }
-  }, []);
-
-  const getData = useCallback(async () => {
-    if (moviesState.length > 0) return;
-    const { data } = await getMovies();
-    if (data.movies) {
-      dispatch(setToMovies(data.movies));
-      setMovies(data.movies);
-    }
-  }, []);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
-
-  useEffect(() => {
-    setMovies(moviesState);
-  }, [moviesState]);
-
-  useEffect(() => {
-    if (search) {
-      filterMoviesByTitle(search, moviesState);
-    } else {
-      setMovies(moviesState);
-    }
-  }, [search]);
+  const [searchParams] = useSearchParams();
+  const param = searchParams.get('search');
 
   const handlePushToDetail = (e: any) => {
     navigate(`/movies/${e.uuid}`);
@@ -82,70 +48,132 @@ function Movies() {
     await favoriteMovie(item.uuid, type);
   }, []);
 
-  if (movies.length === 0) {
-    return (
-      <div style={loading}>
-        <Spin tip="Loading" size="large">
-          <div className="content" />
-        </Spin>
-      </div>
-    );
-  }
+  useEffect(() => {
+    setMovies(moviesState);
+  }, [moviesState]);
+
+  const [loading, setLoading] = useState(false);
+
+  const loadMoreData = useCallback(
+    async (mode?: string) => {
+      if (loading) {
+        return;
+      }
+      setLoading(true);
+      const payload = {
+        search: param,
+        offset: mode != 'refresh' && meta?.to ? meta?.to : 0,
+        limit: 10,
+      };
+      const { data } = await getMovies(payload);
+      if (data.movies) {
+        dispatch(addToMovies(data.movies));
+        setMovies([...movies, ...data.movies]);
+      }
+      setMeta(data.meta);
+      setLoading(false);
+    },
+    [meta, movies, param],
+  );
+
+  useEffect(() => {
+    dispatch(clearToMovies());
+    setMeta([]);
+    loadMoreData('refresh');
+  }, [param, setMeta]);
+
+  useEffect(() => {
+    if (param && meta?.current_page < meta?.last_page && movies.length < 10) {
+      loadMoreData();
+    }
+  }, [meta, movies]);
+
+  const EndMessage = () => {
+    if (
+      meta.current_page !== undefined &&
+      meta.current_page === meta.last_page
+    ) {
+      return <Divider plain>It is all, nothing more!</Divider>;
+    } else {
+      return <></>;
+    }
+  };
 
   return (
     <>
-      {contextHolder}
-      <Row gutter={16}>
-        {movies.map((item: MovieType, index) => (
-          <Col span={6} style={style} key={index} xs={24} xl={6}>
-            <Card
-              hoverable
-              style={card}
-              cover={
-                <div
-                  onClick={() => handlePushToDetail(item)}
-                  style={{
-                    ...cardCover,
-                    ...{ backgroundImage: `url(${item.poster})` },
-                  }}
-                ></div>
-              }
-            >
-              <div style={favoriteButtton}>
-                <Button
-                  disabled={user ? false : true}
-                  style={{ backgroundColor: 'white' }}
-                  onClick={() => handleFavoritedItem(item)}
-                  icon={
-                    <BookOutlined
-                      style={{
-                        color: item.favorited ? 'orange' : '',
-                      }}
-                    />
-                  }
+      <InfiniteScroll
+        dataLength={movies.length}
+        next={loadMoreData}
+        scrollThreshold={1}
+        hasMore={meta.current_page < meta.last_page}
+        style={{
+          overflow: 'hidden',
+          paddingBottom: 30,
+        }}
+        loader={
+          <div style={{ paddingTop: '30px' }}>
+            <Spin tip="Loading" size="large">
+              <div className="content" />
+            </Spin>
+          </div>
+        }
+        endMessage={<EndMessage />}
+      >
+        <List
+          dataSource={movies}
+          grid={{
+            gutter: 16,
+            xs: 1,
+            sm: 2,
+            md: 2,
+            lg: 2,
+            xl: 4,
+            xxl: 4,
+          }}
+          renderItem={(item: MovieType) => (
+            <div style={{ padding: 8 }}>
+              <Card
+                hoverable
+                style={card}
+                cover={
+                  <div
+                    onClick={() => handlePushToDetail(item)}
+                    style={{
+                      ...cardCover,
+                      ...{
+                        backgroundImage: `url(${item.poster})`,
+                      },
+                    }}
+                  ></div>
+                }
+              >
+                <div style={favoriteButtton}>
+                  <Button
+                    disabled={user ? false : true}
+                    onClick={() => handleFavoritedItem(item)}
+                    style={{ backgroundColor: 'white' }}
+                    icon={
+                      <BookOutlined
+                        style={{
+                          color: user && item.favorited ? 'orange' : '',
+                        }}
+                      />
+                    }
+                  />
+                </div>
+                <Meta
+                  title={item.title}
+                  description={`${item.year} / ${item.imdbid}`}
                 />
-              </div>
-              <Meta
-                title={item.title}
-                description={`${item.imdbid} / ${item.year}`}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
+              </Card>
+            </div>
+          )}
+        />
+      </InfiniteScroll>
+      {/* </div> */}
     </>
   );
 }
-const style: React.CSSProperties = {
-  padding: '8px',
-  display: 'flex',
-};
-
-const loading: React.CSSProperties = {
-  margin: '20px 0',
-  textAlign: 'center',
-};
-
 const card: React.CSSProperties = {
   width: '100%',
   height: 300,

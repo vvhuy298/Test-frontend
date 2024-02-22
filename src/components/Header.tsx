@@ -1,16 +1,12 @@
 import { HomeTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
 import { Button, Menu, Input } from 'antd';
 import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { logout, selectUser } from '../store/user';
-import { setSearch } from '../store/search';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Header: React.FC = () => {
-  const searchStr = useSelector((state) => state.search.search);
-  const location = useLocation();
   const navigate = useNavigate();
-  const { pathname } = location;
   const [current, setCurrent] = useState('h');
   const user = useSelector(selectUser);
 
@@ -27,11 +23,7 @@ const Header: React.FC = () => {
   };
 
   const onSearch = (e: any) => {
-    if (pathname !== '/' && e) {
-      navigate(`/?search=${e}`);
-    } else {
-      dispatch(setSearch(e));
-    }
+    navigate(`/?search=${e}`);
   };
 
   return (
@@ -41,12 +33,7 @@ const Header: React.FC = () => {
           <Link to="/">Home</Link>
         </Menu.Item>
         <Menu.Item key="s" disabled>
-          <Search
-            placeholder="input search text"
-            allowClear
-            defaultValue={searchStr}
-            onSearch={onSearch}
-          />
+          <Search placeholder="input search text" onSearch={onSearch} />
         </Menu.Item>
         {user ? (
           <>

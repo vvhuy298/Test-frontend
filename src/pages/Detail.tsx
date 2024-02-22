@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Carousel, Image, Typography } from 'antd';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { findByUuid } from '../store/movies';
 
 type MovieType = {
   imdbid: string;
@@ -13,18 +14,15 @@ type MovieType = {
 };
 
 const Detail: React.FC = () => {
-  const moviesState = useSelector((state) => state.movies.movies);
   const [movie, setMovie] = useState<MovieType>(null);
   const { movieUuid } = useParams();
   const { Text, Title } = Typography;
+  const movieData = useSelector((state) => findByUuid(state, movieUuid));
 
   useEffect(() => {
     document.title = 'Demo - Detail';
-    const movieData = moviesState.find(
-      (movie: any) => movie.uuid === movieUuid,
-    );
     setMovie(movieData);
-  }, [movieUuid, moviesState]);
+  }, [movieUuid]);
 
   return (
     <div style={containner}>

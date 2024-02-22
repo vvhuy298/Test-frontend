@@ -16,7 +16,7 @@ export const movieslice = createSlice({
     },
     addToMovies: (state, action) => {
       const newMovie = action.payload;
-      state.movies.push(newMovie);
+      state.movies = [...state.movies, ...newMovie];
     },
     editMovies: (state, action) => {
       const { id, text } = action.payload;
@@ -49,5 +49,8 @@ export const {
   removeFromMovies,
   changeMoviestatus,
 } = movieslice.actions;
+
+export const findByUuid = (state, uuid) =>
+  state.movies.movies.find((movie) => movie.uuid === uuid);
 
 export default movieslice.reducer;
