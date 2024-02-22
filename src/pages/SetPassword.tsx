@@ -10,7 +10,7 @@ const SetPassword: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Demo - Regis';
+    document.title = 'Demo - Reset Password';
   }, []);
 
   const onFinish = async (payload: any) => {

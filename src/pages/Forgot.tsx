@@ -6,7 +6,7 @@ const Forgot: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
-    document.title = 'Demo - Regis';
+    document.title = 'Demo - Forgot Password';
   }, []);
 
   const onFinish = async (payload: any) => {

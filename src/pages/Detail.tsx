@@ -22,7 +22,7 @@ const Detail: React.FC = () => {
   useEffect(() => {
     document.title = 'Demo - Detail';
     setMovie(movieData);
-  }, [movieUuid]);
+  }, [movieData]);
 
   return (
     <div style={containner}>

@@ -1,24 +1,18 @@
 import React, { useEffect } from 'react';
-import { Button, Form, Input } from 'antd';
-import { login } from '../libs/api';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logged } from '../store/user';
-import { clearToMovies } from '../store/movies';
+// import { Button, Form, Input } from 'antd';
+// import { login } from '../libs/api';
+// import { useNavigate } from 'react-router-dom';
+// import { useDispatch } from 'react-redux';
+// import { logged } from '../store/user';
+// import { clearToMovies } from '../store/movies';
+import Title from 'antd/es/typography/Title';
 
-type FieldType = {
-  email?: string;
-  password?: string;
-  remember?: string;
-};
-
-const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
+const Register: React.FC = () => {
   useEffect(() => {
-    document.title = 'Demo - Forgot Password';
+    document.title = 'Demo - Register';
   }, []);
+  /* const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onFinish = async (payload: any) => {
     const { data } = await login(payload);
@@ -29,11 +23,12 @@ const Login: React.FC = () => {
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
-  };
+  }; */
 
   return (
     <div style={containner}>
-      <Form
+      <Title level={2}>Under Construction</Title>
+      {/* <Form
         name="basic"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
@@ -52,10 +47,10 @@ const Login: React.FC = () => {
 
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button type="primary" htmlType="submit" style={loginFormButton}>
-            Reset Password
+            Registration
           </Button>
         </Form.Item>
-      </Form>
+      </Form> */}
     </div>
   );
 };
@@ -67,12 +62,4 @@ const containner: React.CSSProperties = {
   justifyContent: 'center',
 };
 
-const loginForm: React.CSSProperties = {
-  width: '400px',
-};
-
-const loginFormButton: React.CSSProperties = {
-  width: '100%',
-};
-
-export default Login;
+export default Register;

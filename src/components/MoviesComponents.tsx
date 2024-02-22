@@ -63,7 +63,7 @@ function Movies() {
       const payload = {
         search: param,
         offset: mode != 'refresh' && meta?.to ? meta?.to : 0,
-        limit: 10,
+        limit: 20,
       };
       const { data } = await getMovies(payload);
       if (data.movies) {
@@ -95,7 +95,13 @@ function Movies() {
     ) {
       return <Divider plain>It is all, nothing more!</Divider>;
     } else {
-      return <></>;
+      return (
+        <div style={{ paddingTop: '30px' }}>
+          <Spin tip="Loading" size="large">
+            <div className="content" />
+          </Spin>
+        </div>
+      );
     }
   };
 
