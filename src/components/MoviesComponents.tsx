@@ -88,86 +88,89 @@ function Movies() {
     }
   }, [meta, movies]);
 
+  const EndMessage = () => {
+    if (
+      meta.current_page !== undefined &&
+      meta.current_page === meta.last_page
+    ) {
+      return <Divider plain>It is all, nothing more!</Divider>;
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <>
-      <div
-        id="scrollableDiv"
+      <InfiniteScroll
+        dataLength={movies.length}
+        next={loadMoreData}
+        scrollThreshold={1}
+        hasMore={meta.current_page < meta.last_page}
         style={{
-          height: 'calc(100vh - 100px)',
-          overflowY: 'scroll',
-          padding: '0 16px',
+          overflow: 'hidden',
+          paddingBottom: 30,
         }}
+        loader={
+          <div style={{ paddingTop: '30px' }}>
+            <Spin tip="Loading" size="large">
+              <div className="content" />
+            </Spin>
+          </div>
+        }
+        endMessage={<EndMessage />}
       >
-        <InfiniteScroll
-          dataLength={movies.length}
-          next={loadMoreData}
-          hasMore={meta.current_page < meta.last_page}
-          height={'calc(100vh - 110px)'}
-          style={{
-            overflowX: 'hidden',
+        <List
+          dataSource={movies}
+          grid={{
+            gutter: 16,
+            xs: 1,
+            sm: 2,
+            md: 2,
+            lg: 2,
+            xl: 4,
+            xxl: 4,
           }}
-          loader={
-            <div style={{ paddingTop: '40px' }}>
-              <Spin tip="Loading" size="large">
-                <div className="content" />
-              </Spin>
-            </div>
-          }
-          endMessage={<Divider plain>It is all, nothing more!</Divider>}
-          scrollableTarget="scrollableDiv"
-        >
-          <List
-            dataSource={movies}
-            grid={{
-              gutter: 16,
-              xs: 1,
-              sm: 2,
-              md: 2,
-              lg: 2,
-              xl: 4,
-              xxl: 4,
-            }}
-            renderItem={(item: MovieType) => (
-              <div style={{ padding: 8 }}>
-                <Card
-                  hoverable
-                  style={card}
-                  cover={
-                    <div
-                      onClick={() => handlePushToDetail(item)}
-                      style={{
-                        ...cardCover,
-                        ...{
-                          backgroundImage: `url(${item.poster})`,
-                        },
-                      }}
-                    ></div>
-                  }
-                >
-                  <div style={favoriteButtton}>
-                    <Button
-                      disabled={user ? false : true}
-                      onClick={() => handleFavoritedItem(item)}
-                      style={{ backgroundColor: 'white' }}
-                      icon={
-                        <BookOutlined
-                          style={{
-                            color: user && item.favorited ? 'orange' : '',
-                          }}
-                        />
-                      }
-                    />
-                  </div>
-                  <Meta
-                    title={item.title}
-                    description={`${item.year} / ${item.imdbid}`}
+          renderItem={(item: MovieType) => (
+            <div style={{ padding: 8 }}>
+              <Card
+                hoverable
+                style={card}
+                cover={
+                  <div
+                    onClick={() => handlePushToDetail(item)}
+                    style={{
+                      ...cardCover,
+                      ...{
+                        backgroundImage: `url(${item.poster})`,
+                      },
+                    }}
+                  ></div>
+                }
+              >
+                <div style={favoriteButtton}>
+                  <Button
+                    disabled={user ? false : true}
+                    onClick={() => handleFavoritedItem(item)}
+                    style={{ backgroundColor: 'white' }}
+                    icon={
+                      <BookOutlined
+                        style={{
+                          color: user && item.favorited ? 'orange' : '',
+                        }}
+                      />
+                    }
                   />
-                </Card>
-              </div>
-            )}
-          />
-        </InfiniteScroll>
-      </div>
+                </div>
+                <Meta
+                  title={item.title}
+                  description={`${item.year} / ${item.imdbid}`}
+                />
+              </Card>
+            </div>
+          )}
+        />
+      </InfiniteScroll>
+      {/* </div> */}
     </>
   );
 }
