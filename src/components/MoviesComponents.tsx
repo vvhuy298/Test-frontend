@@ -9,7 +9,6 @@ import { BookOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { selectUser } from '../store/user';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { setSearch } from '../store/search';
 
 type MovieType = {
   imdbid: string;
@@ -29,7 +28,6 @@ type MetaType = {
 };
 
 function Movies() {
-  const search = useSelector((state) => state.search.search);
   const moviesState = useSelector((state) => state.movies.movies);
   const [movies, setMovies] = useState([]);
   const [meta, setMeta] = useState<MetaType>([]);
@@ -50,22 +48,8 @@ function Movies() {
     await favoriteMovie(item.uuid, type);
   }, []);
 
-  const filterMoviesByTitle = useCallback((string: string, movies: any) => {
-    if (!string) return;
-    const searchString = string.toLowerCase();
-    const filterData = movies.filter((movie: MovieType) =>
-      movie.title.toLowerCase().includes(searchString),
-    );
-    return filterData;
-  }, []);
-
   useEffect(() => {
-    if (search) {
-      const filterData = filterMoviesByTitle(search, moviesState);
-      setMovies(filterData);
-    } else {
-      setMovies(moviesState);
-    }
+    setMovies(moviesState);
   }, [moviesState]);
 
   const [loading, setLoading] = useState(false);
@@ -77,6 +61,7 @@ function Movies() {
       }
       setLoading(true);
       const payload = {
+        search: param,
         offset: mode != 'refresh' && meta?.to ? meta?.to : 0,
         limit: 10,
       };
@@ -88,18 +73,17 @@ function Movies() {
       setMeta(data.meta);
       setLoading(false);
     },
-    [search, meta, movies],
+    [meta, movies, param],
   );
 
   useEffect(() => {
     dispatch(clearToMovies());
     setMeta([]);
-    dispatch(setSearch(param));
     loadMoreData('refresh');
   }, [param, setMeta]);
 
   useEffect(() => {
-    if (search && meta?.current_page < meta?.last_page && movies.length < 10) {
+    if (param && meta?.current_page < meta?.last_page && movies.length < 10) {
       loadMoreData();
     }
   }, [meta, movies]);
@@ -119,6 +103,9 @@ function Movies() {
           next={loadMoreData}
           hasMore={meta.current_page < meta.last_page}
           height={'calc(100vh - 110px)'}
+          style={{
+            overflowX: 'hidden',
+          }}
           loader={
             <div style={{ paddingTop: '40px' }}>
               <Spin tip="Loading" size="large">
@@ -126,7 +113,7 @@ function Movies() {
               </Spin>
             </div>
           }
-          endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+          endMessage={<Divider plain>It is all, nothing more!</Divider>}
           scrollableTarget="scrollableDiv"
         >
           <List
@@ -137,8 +124,8 @@ function Movies() {
               sm: 2,
               md: 2,
               lg: 2,
-              xl: 2,
-              xxl: 2,
+              xl: 4,
+              xxl: 4,
             }}
             renderItem={(item: MovieType) => (
               <div style={{ padding: 8 }}>

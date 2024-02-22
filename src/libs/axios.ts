@@ -1,19 +1,14 @@
 import axios from 'axios';
 
 const baseURL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const bearer = JSON.parse(localStorage.getItem('ACCESS_TOKEN') as string);
 const instance = axios.create({
   baseURL: baseURL,
 });
 
-instance.defaults.headers.common['Authorization'] = `Bearer ${bearer}`;
-
 instance.interceptors.request.use(
   (config) => {
     const token = JSON.parse(localStorage.getItem('ACCESS_TOKEN') as string);
-    if (token !== bearer) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => {
